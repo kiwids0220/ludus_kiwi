@@ -16,12 +16,12 @@ variable "iso_file" {
 
 variable "vm_cpu_cores" {
   type    = string
-  default = "2"
+  default = "4"
 }
 
 variable "vm_disk_size" {
   type    = string
-  default = "250G"
+  default = "125G"
 }
 
 variable "vm_memory" {
@@ -89,14 +89,18 @@ source "proxmox-iso" "win11-24h2-x64-pro" {
   # Hit the "Press any key to boot from CD ROM"
   boot_wait = "-1s" # To set boot_wait to 0s, use a negative number, such as "-1s"
   boot_command = [  # 120 seconds of enters to cover all different speeds of disks as windows boots
-    "<return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait>",
-    "<return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait>",
-     "<return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait>",
-      "<return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait>",
-    "<wait30><tab><tab><tab><return>"
+   "<return><wait><return><wait>",
+   "<return><wait><return><wait>",
+   "<return><wait><return><wait>",
+   "<return><wait><return><wait>",
+   "<return><wait><return><wait>",
+   "<return><wait><return><wait>",
+    "<wait10><wait10><wait10>",
+    "<tab><return>",
   ]
-  additional_iso_files {
-    device           = "sata3"
+    additional_iso_files {
+    type              = "sata"
+    index             = "3"
     iso_storage_pool = "${var.iso_storage_pool}"
     unmount          = true
     cd_label         = "PROVISION"
@@ -108,10 +112,12 @@ source "proxmox-iso" "win11-24h2-x64-pro" {
     ]
   }
   additional_iso_files {
-    device           = "sata4"
+    type              = "sata"
+    index             = "4"
     iso_checksum     = "sha256:ebd48258668f7f78e026ed276c28a9d19d83e020ffa080ad69910dc86bbcbcc6"
     iso_url          = "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.240-1/virtio-win-0.1.240.iso"
     iso_storage_pool = "${var.iso_storage_pool}"
+    #iso_download_pve  = true
     unmount          = true
   }
   # Required for Win11
@@ -122,6 +128,11 @@ source "proxmox-iso" "win11-24h2-x64-pro" {
     efi_type          = "4m"
   }
   # End Win11 required option
+
+  tpm_config {
+    tpm_storage_pool = "${var.proxmox_storage_pool}"
+    tpm_version      = "v2.0"
+  }
 
   communicator    = "winrm"
   cores           = "${var.vm_cpu_cores}"
@@ -160,16 +171,28 @@ source "proxmox-iso" "win11-24h2-x64-pro" {
   unmount_iso          = true
   task_timeout         = "20m" // On slow disks the imgcopy operation takes > 1m
 }
-
 build {
   sources = ["source.proxmox-iso.win11-24h2-x64-pro"]
-
   provisioner "powershell" {
     scripts = ["scripts/disable-hibernate.ps1"]
   }
-
   provisioner "powershell" {
     scripts = ["scripts/install-virtio-drivers.ps1"]
   }
+  provisioner "powershell" {
+    scripts = ["scripts/Enroll-Canary.ps1"]
+  }
+  provisioner "powershell" {
+    inline = [
+      "Write-Host 'Rebooting machine…'",
+      "Restart-Computer -Force"
+    ]
+    # give Packer a head-start before it starts polling WinRM again
+    pause_before = "60s"
+  }
+  provisioner "powershell" {
+    scripts = ["scripts/win-updates.ps1"]
+  }
+
 
 }

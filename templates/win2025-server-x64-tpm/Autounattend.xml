@@ -61,84 +61,47 @@
             <UserLocale>en-US</UserLocale>
         </component>
         <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <!-- This bypasses the TPM, Secure boot, and RAM checks during install -->
-            <RunSynchronous>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>1</Order>
-                    <Description>BypassTPMCheck</Description>
-                    <Path>cmd /c reg add "HKLM\SYSTEM\Setup\LabConfig" /v "BypassTPMCheck" /t REG_DWORD /d 1</Path>
-                </RunSynchronousCommand>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>2</Order>
-                    <Description>BypassSecureBootCheck</Description>
-                    <Path>cmd /c reg add "HKLM\SYSTEM\Setup\LabConfig" /v "BypassSecureBootCheck" /t REG_DWORD /d 1</Path>
-                </RunSynchronousCommand>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>3</Order>
-                    <Description>BypassRAMCheck</Description>
-                    <Path>cmd /c reg add "HKLM\SYSTEM\Setup\LabConfig" /v "BypassRAMCheck" /t REG_DWORD /d 1</Path>
-                </RunSynchronousCommand>
-                <RunSynchronousCommand wcm:action="add">
-                    <Order>4</Order>
-                    <Description>Enable Full Telemetry</Description>
-                    <Path>cmd /c reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 3 /f</Path>
-                </RunSynchronousCommand>
-             </RunSynchronous>
             <DiskConfiguration>
                 <Disk wcm:action="add">
                     <DiskID>0</DiskID>
                     <WillWipeDisk>true</WillWipeDisk>
                     <CreatePartitions>
-                        <!-- Windows RE Tools partition -->
-                        <CreatePartition wcm:action="add">
-                            <Order>1</Order>
-                            <Type>Primary</Type>
-                            <Size>300</Size>
-                        </CreatePartition>
                         <!-- System partition (ESP) -->
                         <CreatePartition wcm:action="add">
-                            <Order>2</Order>
+                            <Order>1</Order>
                             <Type>EFI</Type>
                             <Size>100</Size>
                         </CreatePartition>
                         <!-- Microsoft reserved partition (MSR) -->
                         <CreatePartition wcm:action="add">
-                            <Order>3</Order>
+                            <Order>2</Order>
                             <Type>MSR</Type>
                             <Size>128</Size>
                         </CreatePartition>
                         <!-- Windows partition -->
                         <CreatePartition wcm:action="add">
-                            <Order>4</Order>
+                            <Order>3</Order>
                             <Type>Primary</Type>
                             <Extend>true</Extend>
                         </CreatePartition>
                     </CreatePartitions>
                     <ModifyPartitions>
-                        <!-- Windows RE Tools partition -->
+                        <!-- System partition (ESP) -->
                         <ModifyPartition wcm:action="add">
                             <Order>1</Order>
                             <PartitionID>1</PartitionID>
-                            <Label>WINRE</Label>
-                            <Format>NTFS</Format>
-                            <TypeID>DE94BBA4-06D1-4D40-A16A-BFD50179D6AC</TypeID>
-                        </ModifyPartition>
-                        <!-- System partition (ESP) -->
-                        <ModifyPartition wcm:action="add">
-                            <Order>2</Order>
-                            <PartitionID>2</PartitionID>
                             <Label>System</Label>
                             <Format>FAT32</Format>
                         </ModifyPartition>
                         <!-- MSR partition does not need to be modified -->
                         <ModifyPartition wcm:action="add">
-                            <Order>3</Order>
-                            <PartitionID>3</PartitionID>
+                            <Order>2</Order>
+                            <PartitionID>2</PartitionID>
                         </ModifyPartition>
                         <!-- Windows partition -->
                         <ModifyPartition wcm:action="add">
-                            <Order>4</Order>
-                            <PartitionID>4</PartitionID>
+                            <Order>3</Order>
+                            <PartitionID>3</PartitionID>
                             <Label>OS</Label>
                             <Letter>C</Letter>
                             <Format>NTFS</Format>
@@ -155,7 +118,7 @@
                 <OSImage>
                     <InstallTo>
                         <DiskID>0</DiskID>
-                        <PartitionID>4</PartitionID>
+                        <PartitionID>3</PartitionID>
                     </InstallTo>
                     <WillShowUI>OnError</WillShowUI>
                     <InstallToAvailablePartition>false</InstallToAvailablePartition>
@@ -163,7 +126,7 @@
                         <MetaData wcm:action="add">
                             <!-- Name doesn't work on win11? -->
                             <Key>/IMAGE/INDEX</Key> 
-                            <Value>6</Value>
+                            <Value>2</Value>
                         </MetaData>
                     </InstallFrom>
                 </OSImage>
@@ -171,12 +134,24 @@
         </component>
     </settings>
     <settings pass="specialize">
-        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <ComputerName>WIN11-23H2-X64</ComputerName>
-            <TimeZone>Eastern Standard Time</TimeZone>
+        <!-- Server specific settings -->
+        <component name="Microsoft-Windows-ServerManager-SvrMgrNc" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <DoNotOpenServerManagerAtLogon>true</DoNotOpenServerManagerAtLogon>
         </component>
-        <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+        <component name="Microsoft-Windows-IE-ESC" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <IEHardenAdmin>false</IEHardenAdmin>
+            <IEHardenUser>false</IEHardenUser>
+        </component>
+        <component name="Microsoft-Windows-OutOfBoxExperience" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <DoNotOpenInitialConfigurationTasksAtLogon>true</DoNotOpenInitialConfigurationTasksAtLogon>
+        </component>
+        <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <SkipAutoActivation>true</SkipAutoActivation>
+        </component>
+        <!-- End server specific settings -->
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <ComputerName>WIN25-SRV-TPM</ComputerName>
+            <TimeZone>Europe Standard Time</TimeZone>
         </component>
         <component name="Microsoft-Windows-TerminalServices-LocalSessionManager" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <fDenyTSConnections>false</fDenyTSConnections>
@@ -227,8 +202,15 @@
                     <Order>3</Order>
                     <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass E:\windows-common-setup.ps1</CommandLine>
                 </SynchronousCommand>
+                <!-- <SynchronousCommand wcm:action="add">
+                    <Order>3</Order>
+                    <CommandLine>powershell -NoProfile -ExecutionPolicy Bypass E:\win-updates.ps1</CommandLine>
+                </SynchronousCommand> -->
             </FirstLogonCommands>
             <OOBE>
+                <HideLocalAccountScreen>true</HideLocalAccountScreen>
+                <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+                <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
                 <NetworkLocation>Work</NetworkLocation>
                 <!-- 1: Specifies that important and recommended updates are installed automatically.
                      2: Specifies that only important updates are installed.
@@ -238,6 +220,12 @@
                 <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
             </OOBE>
             <UserAccounts>
+                <!-- Server specific setting -->
+                <AdministratorPassword>
+                    <Value>password</Value>
+                    <PlainText>true</PlainText>
+                </AdministratorPassword>
+                <!-- End server specific setting -->
                 <LocalAccounts>
                     <LocalAccount wcm:action="add">
                         <Password>
@@ -251,7 +239,7 @@
                     </LocalAccount>
                 </LocalAccounts>
             </UserAccounts>
-            <TimeZone>Eastern Standard Time</TimeZone>
+            <TimeZone>Europe Standard Time</TimeZone>
         </component>
         <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <InputLocale>en-US</InputLocale>
@@ -265,5 +253,5 @@
             <EnableLUA>false</EnableLUA>
         </component>
     </settings>
-    <cpi:offlineImage xmlns:cpi="urn:schemas-microsoft-com:cpi" cpi:source="catalog:d:/sources/install_windows 10 ENTERPRISE.clg"/>
+    <cpi:offlineImage cpi:source="wim:c:/wim/install.wim#Windows Server 2025 Standard Evaluation (Desktop Experience)" xmlns:cpi="urn:schemas-microsoft-com:cpi" />
 </unattend>
