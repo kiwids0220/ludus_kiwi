@@ -11,4 +11,4 @@
 - name: Include tasks for Windows
   ansible.builtin.include_tasks:
     file: configure-ip-and-hostname-windows.yml
-  when: ansible_system == 'Windows'
+  when: ansible_system == 'Win32NT'
