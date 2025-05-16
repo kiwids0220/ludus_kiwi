@@ -78,6 +78,11 @@
                     <Description>BypassRAMCheck</Description>
                     <Path>cmd /c reg add "HKLM\SYSTEM\Setup\LabConfig" /v "BypassRAMCheck" /t REG_DWORD /d 1</Path>
                 </RunSynchronousCommand>
+                <RunSynchronousCommand wcm:action="add">
+                    <Order>4</Order>
+                    <Description>Enable Full Telemetry</Description>
+                    <Path>cmd /c reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v AllowTelemetry /t REG_DWORD /d 3 /f</Path>
+                </RunSynchronousCommand>
              </RunSynchronous>
             <DiskConfiguration>
                 <Disk wcm:action="add">
