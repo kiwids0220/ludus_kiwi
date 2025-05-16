@@ -1,0 +1,3 @@
+[submodule "ludus_ansible_setup_windows_insider"]
+	path = ludus_ansible_setup_windows_insider
+	url = git@github.com:kiwids0220/ludus_ansible_setup_windows_insider.git
