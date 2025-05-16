@@ -93,7 +93,7 @@ source "proxmox-iso" "win11-24h2-x64-pro" {
     "<return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait>",
      "<return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait>",
       "<return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait><return><wait>",
-    "<tab><tab><tab><return><wait60>"
+    "<wait30><tab><tab><tab><return>"
   ]
   additional_iso_files {
     device           = "sata3"
@@ -163,10 +163,6 @@ source "proxmox-iso" "win11-24h2-x64-pro" {
 
 build {
   sources = ["source.proxmox-iso.win11-24h2-x64-pro"]
-
-  provisioner "windows-shell" {
-    scripts = ["scripts/disablewinupdate.bat"]
-  }
 
   provisioner "powershell" {
     scripts = ["scripts/disable-hibernate.ps1"]
